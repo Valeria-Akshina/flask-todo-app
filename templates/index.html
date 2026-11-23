@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flask To-Do</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
+    form.add { display: flex; gap: 8px; margin-bottom: 20px; }
+    input[type="text"] { flex: 1; padding: 8px 10px; }
+    button { padding: 8px 12px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+    .done { text-decoration: line-through; color: #888; }
+    .actions { display: flex; gap: 6px; }
+  </style>
+</head>
+<body>
+  <h1>To-Do List</h1>
+  <form class="add" action="/add" method="post">
+    <input type="text" name="title" placeholder="Новая задача..." required />
+    <button type="submit">Добавить</button>
+  </form>
+  <ul>
+    {% for task in tasks %}
+      <li>
+        <span class="{{ 'done' if task.done else '' }}">{{ task.title }}</span>
+        <div class="actions">
+          <form action="/toggle/{{ task.id }}" method="post">
+            <button type="submit">{{ 'Вернуть' if task.done else 'Готово' }}</button>
+          </form>
+          <form action="/delete/{{ task.id }}" method="post">
+            <button type="submit">Удалить</button>
+          </form>
+        </div>
+      </li>
+    {% else %}
+      <li>Задач пока нет</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
