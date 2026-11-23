@@ -35,32 +35,26 @@ jobs:
 
       - name: Initialize SQLite database
         env:
-          FLASK_APP: app.py
+          FLASK_APP: manage.py
         run: |
-          python -c "
-          try:
-              import app as app_module
-              flask_app = getattr(app_module, 'app', None)
-              if flask_app is not None:
-                  with flask_app.app_context():
-                      db = getattr(app_module, 'db', None)
-                      if db is not None and hasattr(db, 'create_all'):
-                          db.create_all()
-          except Exception as e:
-              print('DB init note:', e)
-          "
+          python -c "import manage; manage.init_db()"
 
       - name: Smoke test Flask server
         env:
-          FLASK_APP: app.py
+          FLASK_APP: manage.py
           FLASK_ENV: development
         run: |
           nohup flask run --host=127.0.0.1 --port=5000 > flask.log 2>&1 &
           SERVER_PID=$!
           sleep 3
 
-          curl -fsS http://127.0.0.1:5000/ > /dev/null
+          if ! curl -fsS http://127.0.0.1:5000/ > /dev/null; then
+            echo "=== flask.log ==="
+            cat flask.log || true
+            kill "$SERVER_PID" 2>/dev/null || true
+            exit 1
+          fi
+
           echo "Flask server responded with HTTP 200 OK"
           cat flask.log
-
-          kill $SERVER_PID || true
+          kill "$SERVER_PID" 2>/dev/null || true
