@@ -54,6 +54,7 @@ def toggle_task(task_id):
     return redirect(url_for("index"))
 
 
+
 @app.route("/delete/<int:task_id>", methods=["POST"])
 def delete_task(task_id):
     with get_db() as conn:
